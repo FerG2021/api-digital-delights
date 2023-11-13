@@ -17,7 +17,7 @@ return [
 
     'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
         '%s%s',
-        'localhost,localhost:3000,localhost:3001,127.0.0.1,127.0.0.1:8000,::1,balanceado.com.ar,66.97.40.211, api.balanceado.com.ar, modularsrl.com.ar, 179.43.127.55, api.modularsrl.com.ar, apps.modularsrl.com.ar, apicarta.balanceado.com.ar, landingcarta.balanceado.com.ar, panelcarta.balanceado.com.ar,',
+        'localhost,localhost:3000,localhost:3001,127.0.0.1,127.0.0.1:8000,::1',
         Sanctum::currentApplicationUrlWithPort()
     ))),
 

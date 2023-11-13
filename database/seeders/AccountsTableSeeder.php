@@ -4,8 +4,9 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Account;
 
-class ProductSeeder extends Seeder
+class AccountsTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -14,6 +15,8 @@ class ProductSeeder extends Seeder
      */
     public function run()
     {
-        //
+        Account::create([
+            'name' => 'bunker'
+        ]);
     }
 }

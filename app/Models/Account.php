@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class OrderProduct extends Model
+class Account extends Model
 {
     use HasFactory, SoftDeletes;
 
@@ -16,18 +16,14 @@ class OrderProduct extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'id_order',
-        'id_product',
-        'detail',
+        'name',
     ];
 
-    // funciones publicas
-    public function obtenerObjDatos(): array
+    // public function
+    public function getDataObject(): array
     {
         return [
-            'id_order' => $this->id_order,
-            'id_product' => $this->id_product,
-            'detail' => $this->detail,
+            'name' => $this->name
         ];
     }
 }
