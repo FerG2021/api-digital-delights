@@ -7,6 +7,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\AccountController;
 
 
 /*
@@ -20,15 +21,8 @@ use App\Http\Controllers\ProductController;
 |
 */
 
-// Route::get('/categoria', [CategoryController::class,'index']);
-// Route::get('/categoria/{id}', [CategoryController::class,'show']);
-// Route::put('/categoria/{id}', [CategoryController::class,'edit']);
-// Route::delete('/categoria/{id}', [CategoryController::class,'destroy']);
-
 Route::group(['middleware' => ['web']], function () {
-    // your routes here
     // LOGIN
-
     Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
         return $request->user();
     });
@@ -44,5 +38,8 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('/product/{id}', [ProductController::class,'create']);
     Route::post('/product/update/{id}', [ProductController::class,'update']);
     Route::post('/product/delete/{id}', [ProductController::class,'destroy']);
+
+    // My-account
+    Route::put('/my-account/{id}', [AccountController::class,'uptate']);
 
 });
