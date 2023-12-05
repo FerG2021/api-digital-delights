@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\Account;
 use Illuminate\Http\Request;
 use App\Helpers\APIHelpers;
 use Validator, Auth;
@@ -22,6 +23,41 @@ class CategoryController extends Controller
     public function index($id)
     {
         $categories = Category::where('account_id', '=', $id)->get();
+        $categoriesResponse = collect();
+
+
+        if ($categories) {
+            
+            foreach ($categories as $category) {
+                $collectResponse = [
+                    'id' => $category->id,
+                    'account_id' => $category->account_id,
+                    'name' => $category->name,
+                    // 'uuid' => $category->image,
+                    'image' => env('IMAGE_URL') . $category->image,
+                ];
+
+                $categoriesResponse->push($collectResponse);
+            }
+
+            $request = APIHelpers::createAPIResponse(false, 200, 'Categorías encontradas', $categoriesResponse);
+        } else {
+            $request = APIHelpers::createAPIResponse(false, 500, 'No se encontraron categorías', 'No se encontraron categorías');
+        }
+
+        return $request;
+    }
+
+     /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function getAll($account_name)
+    {
+        $account = Account::where('name', '=', $account_name)->first();
+
+        $categories = Category::where('account_id', '=', $account->id)->get();
         $categoriesResponse = collect();
 
 

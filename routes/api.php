@@ -33,13 +33,20 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('/category/update/{id}', [CategoryController::class,'update']);
     Route::post('/category/delete/{id}', [CategoryController::class,'destroy']);
 
+        // Catalogue
+        Route::get('/categories/catalogue/{id}', [CategoryController::class,'getAll']);
+
+
     // Products
     Route::get('/products/{id}', [ProductController::class,'index']);
     Route::post('/product/{id}', [ProductController::class,'create']);
     Route::post('/product/update/{id}', [ProductController::class,'update']);
     Route::post('/product/delete/{id}', [ProductController::class,'destroy']);
 
+        // Catalogue
+        Route::get('/products/catalogue/{id}', [ProductController::class,'getAll']);
+
     // My-account
-    Route::put('/my-account/{id}', [AccountController::class,'uptate']);
+    Route::put('/my-account/update/{id}', [AccountController::class,'update']);
 
 });

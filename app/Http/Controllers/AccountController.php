@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Account;
+use App\Models\User;
 use Illuminate\Http\Request;
+use App\Helpers\APIHelpers;
+use Illuminate\Support\Facades\Hash;
 
 class AccountController extends Controller
 {
@@ -67,9 +70,26 @@ class AccountController extends Controller
      * @param  \App\Models\Account  $account
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Account $account)
+    public function update(Request $request, $id)
     {
-        //
+        $user = User::where('account_id', '=', $id)->where('id', '=', $request->id)->first();
+
+        if ($user) {
+            $user->name = $request->name;
+            $user->lastname = $request->lastname;
+            if ($request->password) {
+                $user->password = Hash::make($request->password);
+            }
+
+            if ($user->save()) {
+                $response = APIHelpers::createAPIResponse(true, 200, 'Usuario actualizado con exito', $user);
+            }
+
+        } else {
+            $response = APIHelpers::createAPIResponse(true, 409, 'El usuario no existe', 'El usuario no existe');
+        }
+
+        return response()->json($response, 200);
     }
 
     /**

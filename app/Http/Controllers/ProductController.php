@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Account;
 use Illuminate\Http\Request;
 use App\Helpers\APIHelpers;
 use Validator, Auth;
@@ -28,6 +29,51 @@ class ProductController extends Controller
         if ($products) {
             foreach ($products as $product) {
                 $categoryDB = Category::where('account_id', '=', $id)->where('id', '=', $product->category_id)->first();
+                $category = $categoryDB->getDataObject();
+
+                $collectResponse = [
+                    'id' => $product->id,
+                    'account_id' => $product->account_id,
+                    'category_id' => $product->category_id,
+                    'category' => $category,
+                    'name' => $product->name,
+                    'description' => $product->description,
+                    'price' => $product->price,
+                    'stock' => $product->stock,
+                    'uuid' => $product->image,
+                    'image' => env('IMAGE_URL') . $product->image,
+                ];
+
+                $productsResponse->push($collectResponse);
+            }
+
+            $request = APIHelpers::createAPIResponse(false, 200, 'Productos encontrados', $productsResponse);
+
+            return response()->json($request, 200);
+        } else {
+            $request = APIHelpers::createAPIResponse(false, 409, 'No se encontraron productos', 'No se encontraron productos');
+
+            return response()->json($request, 409);
+        }
+
+        return $request;
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function getAll($account_name)
+    {
+        $account = Account::where('name', '=', $account_name)->first();
+
+        $products = Product::where('account_id', '=', $account->id)->orderBy('created_at', 'asc')->get();
+        $productsResponse = collect();
+
+        if ($products) {
+            foreach ($products as $product) {
+                $categoryDB = Category::where('account_id', '=', $account->id)->where('id', '=', $product->category_id)->first();
                 $category = $categoryDB->getDataObject();
 
                 $collectResponse = [
