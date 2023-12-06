@@ -33,7 +33,6 @@ class CategoryController extends Controller
                     'id' => $category->id,
                     'account_id' => $category->account_id,
                     'name' => $category->name,
-                    // 'uuid' => $category->image,
                     'image' => env('IMAGE_URL') . $category->image,
                 ];
 

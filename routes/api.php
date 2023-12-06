@@ -8,6 +8,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\PromotionController;
 
 
 /*
@@ -45,6 +46,15 @@ Route::group(['middleware' => ['web']], function () {
 
         // Catalogue
         Route::get('/products/catalogue/{id}', [ProductController::class,'getAll']);
+
+    // Categories
+    Route::get('/promotions/{id}', [PromotionController::class,'index']);
+    Route::post('/promotion/{id}', [PromotionController::class,'create']);
+    Route::post('/promotion/update/{id}', [PromotionController::class,'update']);
+    Route::post('/promotion/delete/{id}', [PromotionController::class,'destroy']);
+
+        // Catalogue
+        Route::get('/promotions/catalogue/{id}', [PromotionController::class,'getAll']);
 
     // My-account
     Route::put('/my-account/update/{id}', [AccountController::class,'update']);

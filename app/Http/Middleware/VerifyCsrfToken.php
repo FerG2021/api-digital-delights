@@ -17,7 +17,10 @@ class VerifyCsrfToken extends Middleware
         // 'http://localhost:8000/api/resenia',
         // 'http://apicarta.balanceado.com.ar/api/resenia',
         'http://localhots:8000/categories/{id}',
-        'http://localhots:8000/products/{id}'
+        'http://localhots:8000/products/{id}',
+        'http://apicatalogue.fssolutions.com.ar/categories/{id}',
+        'http://apicatalogue.fssolutions.com.ar/products/{id}',
+        
 
     ];
 }
