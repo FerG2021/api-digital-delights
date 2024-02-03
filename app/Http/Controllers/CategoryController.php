@@ -128,9 +128,9 @@ class CategoryController extends Controller
             $category = new Category();
 
             $category->account_id = $id;
-            $category->name  = $form['name'];
-            $category->uuid =  $form['uuid'];
-            $category->image =  $form['image'];
+            $category->name = $form['name'];
+            $category->uuid = $form['uuid'];
+            $category->image = $form['image'] ?? null;
 
             if ($category->save()) {
                 $response = APIHelpers::createAPIResponse(false, 200, 'Categoría creada con éxito', $category);

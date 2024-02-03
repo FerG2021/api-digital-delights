@@ -9,6 +9,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\PromotionController;
+use App\Http\Controllers\MarkController;
 
 
 /*
@@ -47,7 +48,7 @@ Route::group(['middleware' => ['web']], function () {
         // Catalogue
         Route::get('/products/catalogue/{id}', [ProductController::class,'getAll']);
 
-    // Categories
+    // Promotions
     Route::get('/promotions/{id}', [PromotionController::class,'index']);
     Route::post('/promotion/{id}', [PromotionController::class,'create']);
     Route::post('/promotion/update/{id}', [PromotionController::class,'update']);
@@ -55,6 +56,12 @@ Route::group(['middleware' => ['web']], function () {
 
         // Catalogue
         Route::get('/promotions/catalogue/{id}', [PromotionController::class,'getAll']);
+
+    // Marks
+    Route::get('/marks/{id}', [MarkController::class,'index']);
+    Route::post('/mark/{id}', [MarkController::class,'create']);
+    Route::post('/mark/update/{id}', [MarkController::class,'update']);
+    Route::post('/mark/delete/{id}', [MarkController::class,'destroy']);
 
     // My-account
     Route::put('/my-account/update/{id}', [AccountController::class,'update']);
