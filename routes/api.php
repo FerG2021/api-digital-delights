@@ -10,6 +10,8 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\MarkController;
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\CarController;
 
 
 /*
@@ -62,6 +64,20 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('/mark/{id}', [MarkController::class,'create']);
     Route::post('/mark/update/{id}', [MarkController::class,'update']);
     Route::post('/mark/delete/{id}', [MarkController::class,'destroy']);
+
+    // Clients
+    Route::get('/clients/{id}', [ClientController::class,'index']);
+    Route::post('/client/{id}', [ClientController::class,'create']);
+    Route::post('/client/update/{id}', [ClientController::class,'update']);
+    Route::post('/client/delete/{id}', [ClientController::class,'destroy']);
+
+    // Cars
+    Route::get('/cars/{id}', [CarController::class,'index']);
+    Route::post('/car/{id}', [CarController::class,'create']);
+    Route::post('/car/update/{id}', [CarController::class,'update']);
+    Route::post('/car/delete/{id}', [CarController::class,'destroy']);
+    Route::post('/car/sell/{id}', [CarController::class,'sellCar']);
+
 
     // My-account
     Route::put('/my-account/update/{id}', [AccountController::class,'update']);
