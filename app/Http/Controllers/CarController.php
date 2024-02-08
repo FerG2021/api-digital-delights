@@ -204,14 +204,8 @@ class CarController extends Controller
                 $client = Client::where('account_id', '=', $id)->where('id', '=', $car->buyer_id)->first();
                 
                 if ($client) {
-                    // array_push($client->cars, $form['car_id']);
-
-                    // $client->cars()->attach($form['car_id']);
-
-                    $currentCars = $client->cars;
+                    $currentCars = json_decode($client->cars);
                     $currentCars[] = $car->id;
-                    // $client->update(['cars' => $currentCars]);
-
                     $client->cars = $currentCars;
 
                     if ($client->save()) {
