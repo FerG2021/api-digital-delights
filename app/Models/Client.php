@@ -34,6 +34,7 @@ class Client extends Model
             'name' => $this->name,
             'lastname' => $this->lastname,
             'birthday' => $this->birthday,
+            'phone_number' => $this->phone_number,
             'address' => $this->address,
         ];
     }

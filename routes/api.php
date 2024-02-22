@@ -12,6 +12,7 @@ use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\MarkController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\CarController;
+use App\Http\Controllers\NotificationController;
 
 
 /*
@@ -77,6 +78,10 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('/car/update/{id}', [CarController::class,'update']);
     Route::post('/car/delete/{id}', [CarController::class,'destroy']);
     Route::post('/car/sell/{id}', [CarController::class,'sellCar']);
+
+    // Notifications
+    Route::get('/notifications/{id}', [NotificationController::class,'create']);
+    Route::post('/notifications/read/{id}', [NotificationController::class,'readNotification']);
 
 
     // My-account

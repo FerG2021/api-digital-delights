@@ -60,21 +60,21 @@ class CarController extends Controller
                     'mark_id' => $car->mark_id,
                     'mark' => $mark,
                     'name' => $car->name,
-                    'description' => $car->description,
+                    'description' => $car->description ?? NULL,
                     'year' => $car->year,
                     'kilometres' => $car->kilometres,
                     'condition_id' => $car->condition,
                     'condition' => $carCondition,
                     'fuel_id' => $car->fuel,
                     'fuel' => $carFuel,
-                    'trunk_space' => $car->trunk_space,
-                    'tank_space' => $car->tank_space,
+                    'trunk_space' => $car->trunk_space ?? NULL,
+                    'tank_space' => $car->tank_space ?? NULL,
                     'weight' => $car->weight,
                     'image' => env('IMAGE_URL') . $car->image,
                     'weight' => $car->weight,
                     'buyer_id' => $car->buyer_id,
                     'buyer' => $client,
-                    'buy_date' => $car->buy_date ?? null,
+                    'buy_date' => $car->buy_date ?? NULL,
                 ];
 
                 $carsResponse->push($collectResponse);
@@ -142,15 +142,15 @@ class CarController extends Controller
             $car->patent = $form['patent'];
             $car->category_id = $form['category_id'];
             $car->name = $form['name'];
-            $car->description = $form['description'];
+            $car->description = $form['description'] ?? NULL;
             $car->year = $form['year'];
             $car->kilometres = $form['kilometres'];
             $car->condition = $form['condition_id'];
             $car->fuel = $form['fuel_id'];
-            $car->trunk_space = $form['trunk_space'] ?? null;
-            $car->tank_space = $form['tank_space'] ?? null;
-            $car->weight = $form['weight'] ?? null;
-            $car->image = $form['image'] ?? null;
+            $car->trunk_space = $form['trunk_space'] ?? NULL;
+            $car->tank_space = $form['tank_space'] ?? NULL;
+            $car->weight = $form['weight'] ?? NULL;
+            $car->image = $form['image'] ?? NULL;
 
             if ($car->save()) {
                 $respuesta = APIHelpers::createAPIResponse(true, 200, 'Vehículo creado con éxito', $car);
