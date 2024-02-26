@@ -130,9 +130,6 @@ class NotificationController extends Controller
             }
         }
 
-
-
-
         $notifications = Notification::where('account_id', $id)->orderBy('created_at', 'asc')->get();
         $notificationsResponse = collect();
 

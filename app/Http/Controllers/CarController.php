@@ -192,12 +192,18 @@ class CarController extends Controller
         }
 
         $car = Car::where('account_id', '=', $id)->where('id', '=', $request->car_id)->where('deleted_at', '=', NULL)->first();
+
+        // $respuesta = APIHelpers::createAPIResponse(true, 200, 'Venta realizada con éxito', $car);
+    
+        // return response()->json($respuesta, 200);
         
         if ($car) {
             $form = $request->all();
 
-            $car->buyer_id = $form['buyer_id'];
-            $car->buy_date = $form['buy_date'];
+            // $car->buyer_id = $form['buyer_id'];
+            $car->buyer_id = $request->buyer_id;
+            // $car->buy_date = $form['buy_date'];
+            $car->buy_date = $request->buy_date;
 
             if ($car->save()) {
 
