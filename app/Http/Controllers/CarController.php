@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use Illuminate\Support\Decimal;
+use Carbon\Carbon;
 
 class CarController extends Controller
 {
@@ -75,6 +76,8 @@ class CarController extends Controller
                     'buyer_id' => $car->buyer_id,
                     'buyer' => $client,
                     'buy_date' => $car->buy_date ?? NULL,
+                    'monthly_fee_paid' => $car->monthly_fee_paid,
+                    'expiration_day' => $car->expiration_day,
                 ];
 
                 $carsResponse->push($collectResponse);
@@ -174,13 +177,15 @@ class CarController extends Controller
         $rules = [
             'buy_date' => 'required',
             'car_id' => 'required',
-            'buyer_id' => 'required'
+            'buyer_id' => 'required',
+            'expiration_day' => 'required'
         ];
 
         $messages = [
             'buy_date.required' => 'La fecha de venta es requerida',
             'car_id.required' => 'El vehículo a vender es requerido',
-            'buyer_id.required' => 'El comprado es requerido',
+            'buyer_id.required' => 'El comprador es requerido',
+            'expiration_day.required' => 'El día de vencimiento de la cuota',
         ];
 
         $validator = Validator::make($request->all(), $rules, $messages);
@@ -204,6 +209,7 @@ class CarController extends Controller
             $car->buyer_id = $request->buyer_id;
             // $car->buy_date = $form['buy_date'];
             $car->buy_date = $request->buy_date;
+            $car->expiration_day = $request->expiration_day;
 
             if ($car->save()) {
 
@@ -385,4 +391,94 @@ class CarController extends Controller
             return response()->json($response, 500);
         }
     }
+
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function monthlyFees($id)
+    {
+        $cars = Car::where('account_id', '=', $id)->orderBy('created_at', 'asc')->get();
+        $overdueMonthlyInstallments = collect();
+
+        $today = Carbon::today();
+
+        if ($today->day == 1) {
+            foreach ($cars as $car) {
+                $car->monthly_fee_paid = 0;
+                $car->save();
+            }
+        }
+
+        if ($cars) {
+            foreach ($cars as $car) {
+                // <
+                if ($car->monthly_fee_paid == 0 && $car->expiration_day <= $today->day && $car->buyer_id != NULL) {
+                    $clientDB = Client::where('account_id', '=', $id)->where('id', '=', $car->buyer_id)->first();
+                    if ($clientDB !== null) {
+                        $client = $clientDB->getDataObject();
+                    } else {
+                        $client = null;
+                    }
+
+                    $markDB = Mark::where('account_id', '=', $id)->where('id', '=', $car->mark_id)->first();
+                    $mark = $markDB->getDataObject();
+
+                    $collectResponse = [
+                        'id' => $car->id,
+                        'account_id' => $car->account_id,
+                        'patent' => $car->patent,
+                        'mark_id' => $car->mark_id,
+                        'mark' => $mark,
+                        'name' => $car->name,
+                        'buyer_id' => $car->buyer_id,
+                        'client' => $client,
+                        'buy_date' => $car->buy_date ?? NULL,
+                        'expiration_day' => $car->expiration_day,
+                        'monthly_fee_paid' => $car->monthly_fee_paid,
+                    ];
+    
+                    $overdueMonthlyInstallments->push($collectResponse);
+                }
+            }
+
+            $request = APIHelpers::createAPIResponse(false, 200, 'Vehículos encontrados', $overdueMonthlyInstallments);
+
+            return response()->json($request, 200);
+        } else {
+            $request = APIHelpers::createAPIResponse(false, 409, 'No se encontraron vehículos', 'No se encontraron vehículos');
+
+            return response()->json($request, 409);
+        }
+        
+
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Models\Car  $car
+     * @return \Illuminate\Http\Response
+     */
+    public function collectFee(Request $request, $id)
+    {
+        $car = Car::where('account_id', '=', $id)->where('id', '=', $request->id)->first();
+
+        if ($car) {
+            $car->monthly_fee_paid = 1;
+
+            if ($car->save()) {
+                $response = APIHelpers::createAPIResponse(true, 200, 'Cuota cobrada con éxito', $car);
+
+                return response()->json($response, 200);
+            }
+        } else {
+            $response = APIHelpers::createAPIResponse(false, 500, 'No se encontró el vehículo', 'No se encontró el vehículo');
+
+            return response()->json($response, 500);
+        }
+    }
+
 }

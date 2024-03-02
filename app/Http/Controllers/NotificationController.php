@@ -111,8 +111,8 @@ class NotificationController extends Controller
         ->orderBy('created_at', 'asc')
         ->get();   
 
-        $carsNotifications = Notification::where('account_id', '=', $id)->where('notification_type', '=', 2)->orderBy('created_at', 'asc');
 
+        $carsNotifications = Notification::where('account_id', '=', $id)->where('notification_type', '=', 2)->orderBy('created_at', 'asc')->get();
 
         foreach ($cars as $car) {
             $carsNotificationExist = $carsNotifications->where('client_id', '=', $car->buyer_id)->where('car_id', '=', $car->id)->first();

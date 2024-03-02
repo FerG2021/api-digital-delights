@@ -78,6 +78,8 @@ Route::group(['middleware' => ['web']], function () {
     Route::post('/car/update/{id}', [CarController::class,'update']);
     Route::post('/car/delete/{id}', [CarController::class,'destroy']);
     Route::post('/car/sell/{id}', [CarController::class,'sellCar']);
+    Route::get('/car/monthlyFees/{id}', [CarController::class,'monthlyFees']);
+    Route::post('/car/monthlyFees/collectfee/{id}', [CarController::class,'collectFee']);
 
     // Notifications
     Route::get('/notifications/{id}', [NotificationController::class,'create']);

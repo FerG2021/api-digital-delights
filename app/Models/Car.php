@@ -56,6 +56,8 @@ class Car extends Model
             'image' => env('IMAGE_URL') . $this->image,
             'buyer_id' => $this->buyer_id,
             'buy_date' => $this->buy_date,
+            'monthly_fee_paid' => $this->monthly_fee_paid,
+            'expiration_day' => $this->expiration_day,
         ];
     }
 }
