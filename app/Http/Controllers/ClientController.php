@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
+use App\Models\Car;
 use Illuminate\Http\Request;
 use App\Helpers\APIHelpers;
 use Validator, Auth;
@@ -26,17 +27,29 @@ class ClientController extends Controller
 
 
         if ($clients) {
-            
             foreach ($clients as $client) {
+                $clientCars = collect();
+                $carsArray = json_decode($client->cars, true);
+
+                if ($carsArray !== NULL) {
+                    foreach ($carsArray as $clientCar) {
+                        $car = Car::where('id', '=', $clientCar)->first();
+                        $clientCars->push($car->patent);
+                    }
+                }
+
                 $collectResponse = [
                     'id' => $client->id,
                     'account_id' => $client->account_id,
+                    'dni' => $client->dni,
                     'name' => $client->name,
                     'lastname' => $client->lastname,
+                    'fullname' => $client->lastname . ', ' . $client->name,
                     'birthday' => $client->birthday,
                     'address' => $client->address,
                     'phone_number' => $client->phone_number,
                     'cars' => $client->cars,
+                    'carsPatent' => $clientCars ?? NULL,
                 ];
 
                 $clientsResponse->push($collectResponse);
@@ -73,7 +86,7 @@ class ClientController extends Controller
             return response()->json($response, 200);
         }
 
-        $findClient = Client::where('account_id', '=', $id)->where('name', '=', $request->name)->where('deleted_at', '=', NULL)->first();
+        $findClient = Client::where('account_id', '=', $id)->where('dni', '=', $request->dni)->where('deleted_at', '=', NULL)->first();
 
         if ($findClient) {
             $response = APIHelpers::createAPIResponse(true, 409, 'El cliente ya existe', $findClient);
@@ -84,6 +97,7 @@ class ClientController extends Controller
            
             $client = new Client();
             $client->account_id = $id;
+            $client->dni = $form['dni'];
             $client->name = $form['name'];
             $client->lastname = $form['lastname'];
             $client->birthday = $form['birthday'];

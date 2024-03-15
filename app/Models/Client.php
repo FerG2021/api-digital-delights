@@ -18,6 +18,7 @@ class Client extends Model
     protected $fillable = [
         'id',
         'account_id',
+        'dni',
         'name',
         'lastname',
         'birthday',
@@ -31,8 +32,10 @@ class Client extends Model
         return [
             'id' => $this->id,
             'account_id' => $this->account_id,
+            'dni' => $this->dni,
             'name' => $this->name,
             'lastname' => $this->lastname,
+            'fullname' => $this->lastname . ', ' . $this->name,
             'birthday' => $this->birthday,
             'phone_number' => $this->phone_number,
             'address' => $this->address,

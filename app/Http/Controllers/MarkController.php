@@ -190,12 +190,16 @@ class MarkController extends Controller
                 $mark->name = $form['name'];
 
                 if ($mark->save()) {
-                    $respuesta = APIHelpers::createAPIResponse(false, 200, 'Marca modificada con éxito', $mark);
+                    $response = APIHelpers::createAPIResponse(true, 200, 'Marca modificada con éxito', $mark);
+                    $code = 200;
                 }
             } else {
-                $respuesta = APIHelpers::createAPIResponse(false, 500, 'No se encontró la marca', 'No se encontró la marca');
+                $response = APIHelpers::createAPIResponse(true, 500, 'No se encontró la marca', 'No se encontró la marca');
+                $code = 500;
             }
         }
+
+        return response()->json($response, $code);
     }
 
     /**

@@ -10,13 +10,12 @@ use App\Models\Mark;
 use App\Models\Client;
 use Illuminate\Http\Request;
 use App\Helpers\APIHelpers;
-use Validator, Auth;
+// use Validator, Auth;
+use Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
-use App\Http\Requests\StoreProductRequest;
-use App\Http\Requests\UpdateProductRequest;
-use Illuminate\Support\Decimal;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
 
 class CarController extends Controller
 {
@@ -27,30 +26,31 @@ class CarController extends Controller
      */
     public function index($id)
     {
-        $cars = Car::where('account_id', '=', $id)->orderBy('created_at', 'asc')->get();
+        $cars = $this->getAllCarsByAccount($id);
         $carsResponse = collect();
+        $response = NULL;
+        $code = NULL;
 
         if ($cars) {
             foreach ($cars as $car) {
-                $categoryDB = Category::where('account_id', '=', $id)->where('id', '=', $car->category_id)->first();
+                $categoryDB = $this->getCategoryByCar($id, $car->category_id);
                 $category = $categoryDB->getDataObject();
 
-                $markDB = Mark::where('account_id', '=', $id)->where('id', '=', $car->mark_id)->first();
+                $markDB = $this->getMarkByCar($id, $car->mark_id);
                 $mark = $markDB->getDataObject();
 
-                $carConditionDB = Carcondition::where('account_id', '=', $id)->where('id', '=', $car->fuel)->first();
+                $carConditionDB = $this->getCarConditionByCar($id, $car->fuel);
                 $carCondition = $carConditionDB->getDataObject();
 
-                $carFuelDB = Carfuel::where('account_id', '=', $id)->where('id', '=', $car->condition)->first();
+                $carFuelDB = $this->getCarFuelByCar($id, $car->condition);
                 $carFuel = $carFuelDB->getDataObject();
                 
-                $clientDB = Client::where('account_id', '=', $id)->where('id', '=', $car->buyer_id)->first();
+                $clientDB = $this->getClientByCar($id, $car->buyer_id);
                 if ($clientDB !== null) {
                     $client = $clientDB->getDataObject();
                 } else {
                     $client = null;
                 }
-                
 
                 $collectResponse = [
                     'id' => $car->id,
@@ -83,16 +83,44 @@ class CarController extends Controller
                 $carsResponse->push($collectResponse);
             }
 
-            $request = APIHelpers::createAPIResponse(false, 200, 'Vehículos encontrados', $carsResponse);
-
-            return response()->json($request, 200);
+            $response = APIHelpers::createAPIResponse(true, 200, 'Vehículos encontrados', $carsResponse);
+            $code = 200;
         } else {
-            $request = APIHelpers::createAPIResponse(false, 409, 'No se encontraron vehículos', 'No se encontraron vehículos');
-
-            return response()->json($request, 409);
+            $response = APIHelpers::createAPIResponse(false, 409, 'No se encontraron vehículos', 'No se encontraron vehículos');
+            $code = 409;
         }
 
-        return $request;
+        return response()->json($response, $code);
+    }
+
+    // Get cars by account
+    protected function getAllCarsByAccount($id) {
+        return Car::where('account_id', '=', $id)->orderBy('created_at', 'asc')->get();
+    }
+
+    // Get category by account and car
+    protected function getCategoryByCar($id, $category_id) {
+        return Category::where('account_id', '=', $id)->where('id', '=', $category_id)->first();
+    }
+
+    // Get mark by account and car
+    protected function getMarkByCar($id, $mark_id) {
+        return Mark::where('account_id', '=', $id)->where('id', '=', $mark_id)->first();
+    }
+
+    // Get car condition by account and car
+    protected function getCarConditionByCar($id, $fuel) {
+        return Carcondition::where('account_id', '=', $id)->where('id', '=', $fuel)->first();
+    }
+
+    // Get car fuel by account and car
+    protected function getCarFuelByCar($id, $condition) {
+        return Carfuel::where('account_id', '=', $id)->where('id', '=', $condition)->first();
+    }
+
+    // Get car fuel by account and car
+    protected function getClientByCar($id, $buyer_id) {
+        return Client::where('account_id', '=', $id)->where('id', '=', $buyer_id)->first();
     }
 
     /**
@@ -113,28 +141,27 @@ class CarController extends Controller
         $validator = Validator::make($request->all(), $rules, $messages);
 
         if ($validator->fails()) {
-            $respuesta = APIHelpers::createAPIResponse(true, 409, 'Se ha producido un error', $validator->errors());
+            $response = APIHelpers::createAPIResponse(true, 409, 'Se ha producido un error', $validator->errors());
+            $code = 409;
 
-            return response()->json($respuesta, 409);
+            return response()->json($response, $code);
         }
 
-        $findCar = Car::where('account_id', '=', $id)->where('patent', '=', $request->patent)->where('deleted_at', '=', NULL)->first();
+        $response = NULL;
+        $code = NULL;
+        $findCar = $this->getCarByPatent($id, $request->patent);
 
         if ($findCar) {
             $response = APIHelpers::createAPIResponse(true, 409, 'El vehículo ya existe', $findCar);
-
-            return response()->json($response, 409);
+            $code = 409;
         } else {
             $form = $request->all();
-            $form['uuid'] = (string) Str::uuid();
 
             if ($request->hasFile('image')) {
                 $form['image'] = time() . '_' . $request->file('image')->getClientOriginalName();
                 
                 $request->file('image')->storeAs('images', $form['image']);
     
-                $nombreGuardar = 'public/images/' . $form['image'];
-                
                 Storage::putFileAs('public/images/', $request->file('image'), $form['image']);
             }
 
@@ -156,15 +183,19 @@ class CarController extends Controller
             $car->image = $form['image'] ?? NULL;
 
             if ($car->save()) {
-                $respuesta = APIHelpers::createAPIResponse(true, 200, 'Vehículo creado con éxito', $car);
-    
-                return response()->json($respuesta, 200);
+                $response = APIHelpers::createAPIResponse(true, 200, 'Vehículo creado con éxito', $car);
+                $code = 200;
             } else {
-                $respuesta = APIHelpers::createAPIResponse(true, 409, 'No se pudo crear el vehículo', $validator->errors());
-    
-                return response()->json($respuesta, 409);
+                $response = APIHelpers::createAPIResponse(true, 409, 'No se pudo crear el vehículo', $validator->errors());
+                $code = 409;
             }
         }
+
+        return response()->json($response, $code);
+    }
+
+    protected function getCarByPatent($id, $patent) {
+        return Car::where('account_id', '=', $id)->where('patent', '=', $patent)->where('deleted_at', '=', NULL)->first();
     }
 
     /**
@@ -196,24 +227,15 @@ class CarController extends Controller
             return response()->json($response, 409);
         }
 
-        $car = Car::where('account_id', '=', $id)->where('id', '=', $request->car_id)->where('deleted_at', '=', NULL)->first();
+        $car = $this->getCarByID($id, $request->car_id);
 
-        // $respuesta = APIHelpers::createAPIResponse(true, 200, 'Venta realizada con éxito', $car);
-    
-        // return response()->json($respuesta, 200);
-        
         if ($car) {
-            $form = $request->all();
-
-            // $car->buyer_id = $form['buyer_id'];
             $car->buyer_id = $request->buyer_id;
-            // $car->buy_date = $form['buy_date'];
             $car->buy_date = $request->buy_date;
             $car->expiration_day = $request->expiration_day;
 
             if ($car->save()) {
-
-                $client = Client::where('account_id', '=', $id)->where('id', '=', $car->buyer_id)->first();
+                $client = $this->getClientByBuyerID($id, $car->buyer_id);
                 
                 if ($client) {
                     $currentCars = json_decode($client->cars);
@@ -231,58 +253,26 @@ class CarController extends Controller
                     }
                 } else {
                     $response = APIHelpers::createAPIResponse(true, 409, 'No se pudo realizar la venta', $validator->errors());
-    
                     return response()->json($response, 409);
                 }
-
-                // $respuesta = APIHelpers::createAPIResponse(true, 200, 'Venta realizada con éxito', $car);
-    
-                // return response()->json($respuesta, 200);
             } else {
                 $response = APIHelpers::createAPIResponse(true, 409, 'No se pudo realizar la venta', $validator->errors());
-    
                 return response()->json($response, 409);
             }
             
         } else {
             $response = APIHelpers::createAPIResponse(true, 409, 'El vehículo seleccionado no existe', $validator->errors());
-    
             return response()->json($response, 409);
         }
         
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
+    protected function getCarByID($id, $car_id) {
+        return Car::where('account_id', '=', $id)->where('id', '=', $car_id)->where('deleted_at', '=', NULL)->first();
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Car  $car
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Car $car)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Car  $car
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Car $car)
-    {
-        //
+    protected function getClientByBuyerID($id, $buyer_id) {
+        return Client::where('account_id', '=', $id)->where('id', '=', $buyer_id)->first();
     }
 
     /**
@@ -344,14 +334,14 @@ class CarController extends Controller
                 $car->patent = $form['patent'];
                 $car->category_id = $form['category_id'];
                 $car->name = $form['name'];
-                $car->description = $form['description'];
+                $car->description = $form['description'] ?? NULL;
                 $car->year = $form['year'];
                 $car->kilometres = $form['kilometres'];
                 $car->condition = $form['condition_id'];
                 $car->fuel = $form['fuel_id'];
-                $car->trunk_space = $form['trunk_space'] ?? null;
-                $car->tank_space = $form['tank_space'] ?? null;
-                $car->weight = $form['weight'] ?? null;
+                $car->trunk_space = $form['trunk_space'] ?? NULL;
+                $car->tank_space = $form['tank_space'] ?? NULL;
+                $car->weight = $form['weight'] ?? NULL;
 
                 if ($car->save()) {
                     $respuesta = APIHelpers::createAPIResponse(true, 200, 'Vehículo actualizado con éxito', $car);

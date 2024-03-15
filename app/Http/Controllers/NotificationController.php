@@ -108,25 +108,28 @@ class NotificationController extends Controller
         
         $cars = Car::where('account_id', $id)
         ->whereRaw("DATE(buy_date) <= '$dateTo14'")
+        ->where('buyer_id', '<>', NULL)
         ->orderBy('created_at', 'asc')
         ->get();   
 
 
         $carsNotifications = Notification::where('account_id', '=', $id)->where('notification_type', '=', 2)->orderBy('created_at', 'asc')->get();
 
-        foreach ($cars as $car) {
-            $carsNotificationExist = $carsNotifications->where('client_id', '=', $car->buyer_id)->where('car_id', '=', $car->id)->first();
-
-            if ($carsNotificationExist === NULL) {
-                $notification = new Notification();
-
-                $notification->account_id = $id;
-                $notification->date = $car->buy_date;
-                $notification->notification_type = 2;
-                $notification->client_id = $car->buyer_id;
-                $notification->car_id = $car->id;
-
-                $notification->save();
+        if ($cars !== NULL) {
+            foreach ($cars as $car) {
+                $carsNotificationExist = $carsNotifications->where('client_id', '=', $car->buyer_id)->where('car_id', '=', $car->id)->first();
+    
+                if ($carsNotificationExist === NULL) {
+                    $notification = new Notification();
+    
+                    $notification->account_id = $id;
+                    $notification->date = $car->buy_date;
+                    $notification->notification_type = 2;
+                    $notification->client_id = $car->buyer_id;
+                    $notification->car_id = $car->id;
+    
+                    $notification->save();
+                }
             }
         }
 

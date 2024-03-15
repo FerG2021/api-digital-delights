@@ -231,12 +231,16 @@ class CategoryController extends Controller
 
 
                 if ($category->save()) {
-                    $respuesta = APIHelpers::createAPIResponse(false, 200, 'Categoría modificada con éxito', $category);
+                    $response = APIHelpers::createAPIResponse(true, 200, 'Categoría modificada con éxito', $category);
+                    $code = 200;
                 }
             } else {
-                $respuesta = APIHelpers::createAPIResponse(false, 500, 'No se encontró la categoría', 'No se encontró la categoría');
+                $response = APIHelpers::createAPIResponse(true, 500, 'No se encontró la categoría', 'No se encontró la categoría');
+                $code = 500;
             }
         }
+
+        return response()->json($response, $code);
     }
 
     /**
