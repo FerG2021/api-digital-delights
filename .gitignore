@@ -11,5 +11,8 @@ Thumbs.db
 
 .env
 storage/app/imagenes
+storage/app/images
 storage/app/public/imagenes
+storage/app/public/images
 public/storage
+storage/logs/laravel.log

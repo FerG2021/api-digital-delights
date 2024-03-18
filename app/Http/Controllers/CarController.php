@@ -52,6 +52,15 @@ class CarController extends Controller
                     $client = null;
                 }
 
+                $urlImages = [];
+                $imagesArray = json_decode($car->image, true);
+
+                if ($imagesArray !== null && is_array($imagesArray)) {
+                    foreach ($imagesArray as $image) {
+                        $urlImages[] = env('IMAGE_URL') . $image;
+                    }
+                } 
+
                 $collectResponse = [
                     'id' => $car->id,
                     'account_id' => $car->account_id,
@@ -71,7 +80,8 @@ class CarController extends Controller
                     'trunk_space' => $car->trunk_space ?? NULL,
                     'tank_space' => $car->tank_space ?? NULL,
                     'weight' => $car->weight,
-                    'image' => env('IMAGE_URL') . $car->image,
+                    // 'image' => env('IMAGE_URL') . $car->image,
+                    'image' => $urlImages,
                     'weight' => $car->weight,
                     'buyer_id' => $car->buyer_id,
                     'buyer' => $client,
@@ -156,13 +166,22 @@ class CarController extends Controller
             $code = 409;
         } else {
             $form = $request->all();
+            $imagesArray = []; 
 
-            if ($request->hasFile('image')) {
-                $form['image'] = time() . '_' . $request->file('image')->getClientOriginalName();
+            if ($request->hasFile('image1')) {
+                $imagenes = explode(',', $request->input('image'));
+                $length = count($imagenes);
+
+                for ($i=0; $i < $length; $i++) { 
+                    $requestImageName = 'image'. $i + 1;
+                    $imageName = time() . '_' . $request->file($requestImageName)->getClientOriginalName();
                 
-                $request->file('image')->storeAs('images', $form['image']);
-    
-                Storage::putFileAs('public/images/', $request->file('image'), $form['image']);
+                    $request->file($requestImageName)->storeAs('images', $imageName);
+        
+                    Storage::putFileAs('public/images/', $request->file($requestImageName), $imageName);
+
+                    $imagesArray[] = $imageName;
+                }
             }
 
             $car = new Car();
@@ -181,6 +200,7 @@ class CarController extends Controller
             $car->tank_space = $form['tank_space'] ?? NULL;
             $car->weight = $form['weight'] ?? NULL;
             $car->image = $form['image'] ?? NULL;
+            $car->image = json_encode($imagesArray) ?? NULL;
 
             if ($car->save()) {
                 $response = APIHelpers::createAPIResponse(true, 200, 'Vehículo creado con éxito', $car);
@@ -317,16 +337,22 @@ class CarController extends Controller
                 $form = $request->all();
                 $form['uuid'] = (string) Str::uuid();
 
-                if ($request->hasFile('image')) {
-                    $form['image'] = time() . '_' . $request->file('image')->getClientOriginalName();
+                if ($request->hasFile('image1')) {
+                    $imagenes = explode(',', $request->input('image'));
+                    $length = count($imagenes);
+    
+                    for ($i=0; $i < $length; $i++) { 
+                        $requestImageName = 'image'. $i + 1;
+                        $imageName = time() . '_' . $request->file($requestImageName)->getClientOriginalName();
                     
-                    $request->file('image')->storeAs('images', $form['image']);
-        
-                    $nombreGuardar = 'public/images/' . $form['image'];
-                    
-                    Storage::putFileAs('public/images/', $request->file('image'), $form['image']);
+                        $request->file($requestImageName)->storeAs('images', $imageName);
+            
+                        Storage::putFileAs('public/images/', $request->file($requestImageName), $imageName);
+    
+                        $imagesArray[] = $imageName;
+                    }
 
-                    $car->image =  $form['image'];
+                    $car->image =  $imagesArray;
                 }
 
                 $car->account_id = $id;
